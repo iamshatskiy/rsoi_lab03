@@ -173,7 +173,7 @@ namespace LibrarySystem.Controllers
             }
 
             var rating = await _librarySystemService.GetRatingResponseByUserName(xUserName);
-            return rating == null ? BadRequest() : Ok(rating);
+            return rating;
         }
 
     }

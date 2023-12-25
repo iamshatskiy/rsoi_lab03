@@ -185,9 +185,9 @@ namespace LibrarySystem.Services
             return result;
         }
 
-        private async Task<RatingResponse> RatingResponse(string username, string reservationUid, DateOnly date, DateOnly tilldate, string condition)
+        private async Task<RatingResponse> RatingResponse(string username, string bookUid, DateOnly date, DateOnly tilldate, string condition)
         {
-                var book = await _httpClient.GetFromJsonAsync<Books>($"http://library:8060/bookInfo?bookUid={reservationUid}");
+                var book = await _httpClient.GetFromJsonAsync<Books>($"http://library:8060/bookInfo?bookUid={bookUid}");
 
                 var ratingRequestBody = new RatingUpdateRequest
                 {
@@ -270,7 +270,7 @@ namespace LibrarySystem.Services
 
             var library = await BookReturn(reservation.Book_uid.ToString(), reservation.Library_uid.ToString());
 
-            var rating = await RatingResponse(userName, reservation.Reservation_uid.ToString(), request.date, reservation.Till_date, request.condition);
+            var rating = await RatingResponse(userName, reservation.Book_uid.ToString(), request.date, reservation.Till_date, request.condition);
             
             return new CloseReservationResponse { isReturned = true };
         }
@@ -297,16 +297,16 @@ namespace LibrarySystem.Services
                 var checkLibrary = await HealthCheckAsync("library:8060");
                 LibraryResponse library = null;
                 BookResponse book = null;
-                if (!checkLibrary)
+                if (checkLibrary)
                 {
                     library = await _httpClient.GetFromJsonAsync<LibraryResponse>($"http://library:8060/library/{reservation.Library_uid.ToString()}");
                     book = await _httpClient.GetFromJsonAsync<BookResponse>($"http://library:8060/book/{reservation.Book_uid.ToString()}");
                 }
                 responses.Add(new OpenReservationResponse {
                               reservationUid = reservation.Reservation_uid,
+                              status = reservation.Status,
                               startDate = reservation.Start_date,
                               tillDate = reservation.Till_date,
-                              status = reservation.Status,
                               book = book == null ? reservation.Book_uid : book,
                               library = library == null ? reservation.Library_uid : library
                 });
