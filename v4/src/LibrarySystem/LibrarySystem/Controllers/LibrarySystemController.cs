@@ -18,8 +18,20 @@ namespace LibrarySystem.Controllers
 
         //DONE
         [HttpGet("libraries")]
-        public async Task<PaginationResponse<LibraryResponse>> GetCityLibraries([FromQuery, Required] string city, [FromQuery] int? page, [FromQuery] int? size)
+        public async Task<ActionResult<PaginationResponse<LibraryResponse>>> GetCityLibraries([FromQuery, Required] string city, [FromQuery] int? page, [FromQuery] int? size)
         {
+            var checkLibraryState = _librarySystemService.HealthCheckAsync("library:8060");
+
+            if (!(await checkLibraryState))
+            {
+                var resp = new ErrorResponse()
+                {
+                    Message = "Library Service unavailable",
+                };
+
+                Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                return new ObjectResult(resp);
+            }
             var availableBooks = await _librarySystemService.GetCityLibraries(page, size, city);
 
             return availableBooks;
@@ -27,8 +39,20 @@ namespace LibrarySystem.Controllers
 
         //DONE
         [HttpGet("libraries/{libraryUid}/books")]
-        public async Task<PaginationResponse<LibraryBookResponse>> GetLibraryBooks([FromRoute] string libraryUid, [FromQuery] int? page, [FromQuery] int? size, [FromQuery] bool allShow = false)
+        public async Task<ActionResult<PaginationResponse<LibraryBookResponse>>> GetLibraryBooks([FromRoute] string libraryUid, [FromQuery] int? page, [FromQuery] int? size, [FromQuery] bool allShow = false)
         {
+            var checkLibraryState = _librarySystemService.HealthCheckAsync("library:8060");
+
+            if (!(await checkLibraryState))
+            {
+                var resp = new ErrorResponse()
+                {
+                    Message = "Library Service unavailable",
+                };
+
+                Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                return new ObjectResult(resp);
+            }
             var books = await _librarySystemService.GetLibraryBooks(page, size, Guid.Parse(libraryUid), allShow);
 
             return books;
@@ -42,7 +66,26 @@ namespace LibrarySystem.Controllers
                 return BadRequest();
             }
 
+            var checkReservaionState = _librarySystemService.HealthCheckAsync("reservation:8070");
+
+            if (!(await checkReservaionState))
+            {
+                var resp = new ErrorResponse()
+                {
+                    Message = "Reservation Service unavailable",
+                };
+
+                Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                return new ObjectResult(resp);
+            }
+
             var reservations = await _librarySystemService.GetBookReservations(xUserName);
+
+            if (reservations == null || !reservations.Any())
+            {
+                return null;
+            }
+
             return Ok(reservations);
         }
 
@@ -57,7 +100,21 @@ namespace LibrarySystem.Controllers
             }
 
             var reservation = await _librarySystemService.CreateBookReservation(xUserName, request);
-            return Ok(reservation);
+            if (reservation is string)
+            {
+                var resp = new ErrorResponse()
+                {
+                    Message = reservation.ToString()
+                };
+
+                Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                return new ObjectResult(resp);
+            }
+            if (reservation == null)
+            {
+                return null;
+            }
+            return (RentInfoResponse) reservation;
         }
 
 
@@ -65,6 +122,20 @@ namespace LibrarySystem.Controllers
         [HttpPost("reservations/{reservationUid}/return")]
         public async Task<ActionResult<CloseReservationResponse>> CloseBookReservation([FromRoute, Required] string reservationUid, [FromHeader(Name = "X-User-Name"), Required] string xUserName, [FromBody] ReturnBookRequest request)
         {
+
+            var checkReservaionState = _librarySystemService.HealthCheckAsync("reservation:8070");
+
+            if (!(await checkReservaionState))
+            {
+                var resp = new ErrorResponse()
+                {
+                    Message = "Reservation Service unavailable",
+                };
+
+                Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                return new ObjectResult(resp);
+            }
+
             string[] validConditions = { "EXCELLENT", "GOOD", "BAD" };
             if (string.IsNullOrWhiteSpace(xUserName) || !(Array.Exists(validConditions, element => element == request.condition)))
             {
@@ -86,6 +157,19 @@ namespace LibrarySystem.Controllers
             {
                 return BadRequest();
 
+            }
+
+            var checkRatingState = _librarySystemService.HealthCheckAsync("rating:8050");
+
+            if (!(await checkRatingState))
+            {
+                var resp = new ErrorResponse()
+                {
+                    Message = "Rating Service unavailable",
+                };
+
+                Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                return new ObjectResult(resp);
             }
 
             var rating = await _librarySystemService.GetRatingResponseByUserName(xUserName);
