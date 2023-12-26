@@ -18,9 +18,9 @@ services:
       - db-local
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER"]
-      interval: 10s
+      interval: 5s
       timeout: 15s
-      retries: 7
+      retries: 8
 
   librarysystem:
     image: ${DOCKER_REGISTRY-}librarysystem
