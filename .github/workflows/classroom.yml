@@ -38,14 +38,9 @@ jobs:
         run: |
           docker compose up -d
           ./scripts/wait-script.sh
-          docker logs postgres
         env:
           WAIT_PORTS: 8080,8070,8060,8050
           
-      - name: View PostgreSQL Container Logs
-        run: docker logs postgres
-      # TODO setup variant, service and port
-
       - name: Run API Tests
         timeout-minutes: 5
         run: ./scripts/test-script.sh
