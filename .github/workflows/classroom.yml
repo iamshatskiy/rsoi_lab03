@@ -40,7 +40,9 @@ jobs:
           ./scripts/wait-script.sh
         env:
           WAIT_PORTS: 8080,8070,8060,8050
-
+          
+      - name: View PostgreSQL Container Logs
+        run: docker logs postgres
       # TODO setup variant, service and port
 
       - name: Run API Tests
