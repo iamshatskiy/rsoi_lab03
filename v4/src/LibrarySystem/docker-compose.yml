@@ -19,14 +19,14 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER"]
       interval: 5s
-      timeout: 15s
-      retries: 8
+      timeout: 5s
+      retries: 5
 
   librarysystem:
     image: ${DOCKER_REGISTRY-}librarysystem
     container_name: librarysystem
     build:
-      context: ./v4/src/LibrarySystem/LibrarySystem
+      context: ./LibrarySystem
       dockerfile: Dockerfile
     depends_on:
       - reservation
@@ -47,7 +47,7 @@ services:
     image: ${DOCKER_REGISTRY-}reservation
     container_name: reservation
     build:
-      context: ./v4/src/LibrarySystem/Reservation
+      context: ./Reservation
       dockerfile: Dockerfile
     depends_on:
       postgres:
@@ -66,7 +66,7 @@ services:
     image: ${DOCKER_REGISTRY-}library
     container_name: library
     build:
-      context: ./v4/src/LibrarySystem/Library
+      context: ./Library
       dockerfile: Dockerfile
     depends_on:
       postgres:
@@ -85,7 +85,7 @@ services:
     image: ${DOCKER_REGISTRY-}rating
     container_name: rating
     build:
-      context: ./v4/src/LibrarySystem/Rating
+      context: ./Rating
       dockerfile: Dockerfile
     depends_on:
       postgres:

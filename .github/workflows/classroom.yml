@@ -31,24 +31,23 @@ jobs:
         
       - name: Build images
         timeout-minutes: 10
-        run: docker compose -f v4/src/LibrarySystem/docker-compose.yml build
+        run: docker compose build
 
       - name: Run containers
         timeout-minutes: 5
         run: |
-          docker compose -f v4/src/LibrarySystem/docker-compose.yml up -d
+          docker compose up -d
           ./scripts/wait-script.sh
+          docker logs postgres
         env:
           WAIT_PORTS: 8080,8070,8060,8050
-
-      # TODO setup variant, service and port
-
+          
       - name: Run API Tests
         timeout-minutes: 5
         run: ./scripts/test-script.sh
         env:
           VARIANT: v4
-          SERVICE_NAME: localhost
+          SERVICE_NAME: rating
           PORT_NUMBER: 8050
 
       - uses: education/autograding@v1
