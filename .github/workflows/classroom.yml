@@ -48,7 +48,7 @@ jobs:
         run: ./scripts/test-script.sh
         env:
           VARIANT: v4
-          SERVICE_NAME: localhost
+          SERVICE_NAME: reservation
           PORT_NUMBER: 8050
 
       - uses: education/autograding@v1
