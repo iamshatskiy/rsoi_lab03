@@ -110,7 +110,7 @@ namespace LibrarySystem.Services
             var checkRating = HealthCheckAsync("rating:8050");
             if (!await checkRating)
             {
-                return "Bonus service unavailable";
+                return "Bonus Service unavailable";
             }
             using var ratingRequest = new HttpRequestMessage(HttpMethod.Get, $"http://rating:8050/rating");
             ratingRequest.Headers.Add("X-User-Name", userName);
