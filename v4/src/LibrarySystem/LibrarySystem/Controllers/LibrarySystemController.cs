@@ -10,7 +10,7 @@ namespace LibrarySystem.Controllers
     public class LibrarySystemController : Controller
     {
         readonly ILibrarySystemService _librarySystemService;
-        
+
         public LibrarySystemController(ILibrarySystemService librarySystemService)
         {
             _librarySystemService = librarySystemService;
@@ -22,7 +22,7 @@ namespace LibrarySystem.Controllers
         {
             var checkLibraryState = _librarySystemService.HealthCheckAsync("library:8060");
 
-            if (!(await checkLibraryState))
+            if (!await checkLibraryState)
             {
                 var resp = new ErrorResponse()
                 {
@@ -114,7 +114,7 @@ namespace LibrarySystem.Controllers
             {
                 return null;
             }
-            return (RentInfoResponse) reservation;
+            return (RentInfoResponse)reservation;
         }
 
 
@@ -143,7 +143,7 @@ namespace LibrarySystem.Controllers
             }
 
             var returnCond = await _librarySystemService.CloseBookReservation(xUserName, Guid.Parse(reservationUid), request);
-            if (returnCond.isReturned == false) 
+            if (returnCond.isReturned == false)
             {
                 return NotFound($"User {xUserName} has no open reservation with UUID = {reservationUid}");
             }
@@ -165,7 +165,7 @@ namespace LibrarySystem.Controllers
             {
                 var resp = new ErrorResponse()
                 {
-                    Message = "Rating Service unavailable",
+                    Message = "Bonus Service unavailable",
                 };
 
                 Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
